@@ -177,9 +177,10 @@ function Admin() {
     try {
       const dbOrders = await getOrders();
       setOrders(dbOrders);
+      setStatus("");
     } catch (error) {
       console.error(error);
-      setStatus("Could not load orders.");
+      setStatus(`Error loading orders: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   }
 
