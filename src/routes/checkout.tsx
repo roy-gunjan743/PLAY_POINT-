@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { loadCart, saveCart, type CartItem } from "@/lib/cart";
 import { RazorpayButton } from "@/components/RazorpayButton";
-import qrCode from "@/assets/qr-code.svg";
+import qrCode from "@/assets/3099f068-84ae-4cf3-9fd2-4c90c850804a.jpg";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
