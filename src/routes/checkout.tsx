@@ -17,12 +17,6 @@ import { saveOrder } from "@/lib/order-db";
 import qrCode from "@/assets/3099f068-84ae-4cf3-9fd2-4c90c850804a.jpg";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({
-    meta: [
-      { title: "Checkout - PLAYPOINT" },
-      { name: "description", content: "Secure checkout for your authentic jersey order." },
-    ],
-  }),
   component: Checkout,
 });
 

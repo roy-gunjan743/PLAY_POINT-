@@ -18,12 +18,6 @@ import { addProduct as createProduct, dbProductToProduct, deleteProduct, getProd
 import { getOrders, updateOrderStatus, type DbOrder } from "@/lib/order-db";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: [
-      { title: "Admin - PLAYPOINT" },
-      { name: "description", content: "Add and remove PLAYPOINT products." },
-    ],
-  }),
   component: Admin,
 });
 
