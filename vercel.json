@@ -2,6 +2,5 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/server",
   "devCommand": "npm run dev",
-  "framework": "vite",
-  "nodejs": "18.x"
+  "framework": "vite"
 }
