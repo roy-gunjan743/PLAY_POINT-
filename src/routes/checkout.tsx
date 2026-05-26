@@ -112,10 +112,10 @@ function Checkout() {
         tax,
         shipping,
         total,
-        status: "pending",
+        status: "confirmed",
       });
 
-      setOrderStatus("✓ Order saved! Admin will confirm payment.");
+      setOrderStatus("✓ Order confirmed! You'll receive email confirmation soon.");
       updateCart([]);
       setStep(3);
     } catch (error) {
