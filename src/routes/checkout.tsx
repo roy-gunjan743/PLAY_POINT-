@@ -3,11 +3,9 @@ import { useEffect, useState } from "react";
 import {
   Check,
   ChevronLeft,
-  CreditCard,
   Lock,
   Minus,
   Plus,
-  QrCode,
   Shield,
   ShoppingBag,
   Trash2,
@@ -223,8 +221,12 @@ function Checkout() {
 
               {method === "upi" && (
                 <div className="mt-6 grid gap-5 border border-dashed border-white/15 bg-white/[0.02] p-6 sm:grid-cols-[140px_1fr] sm:items-center">
-                  <div className="grid aspect-square place-items-center bg-white p-4 text-black">
-                    <QrCode className="h-20 w-20" />
+                  <div className="grid aspect-square place-items-center overflow-hidden border border-white/10 bg-white p-4">
+                    <img
+                      src="/qr-code.png"
+                      alt="Razorpay Payment QR Code"
+                      className="h-full w-full object-contain"
+                    />
                   </div>
                   <div>
                     <div className="font-['Bebas_Neue'] text-3xl tracking-wider">SCAN AND PAY</div>
