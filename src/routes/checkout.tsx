@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { loadCart, saveCart, type CartItem } from "@/lib/cart";
 import { RazorpayButton } from "@/components/RazorpayButton";
+import qrCode from "@/assets/qr-code.svg";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -221,12 +222,8 @@ function Checkout() {
 
               {method === "upi" && (
                 <div className="mt-6 grid gap-5 border border-dashed border-white/15 bg-white/[0.02] p-6 sm:grid-cols-[140px_1fr] sm:items-center">
-                  <div className="grid aspect-square place-items-center overflow-hidden border border-white/10 bg-white p-4">
-                    <img
-                      src="/qr-code.png"
-                      alt="Razorpay Payment QR Code"
-                      className="h-full w-full object-contain"
-                    />
+                  <div className="grid aspect-square place-items-center overflow-hidden border border-white/10 bg-white p-2">
+                    <img src={qrCode} alt="UPI QR Code" className="h-full w-full" />
                   </div>
                   <div>
                     <div className="font-['Bebas_Neue'] text-3xl tracking-wider">SCAN AND PAY</div>
