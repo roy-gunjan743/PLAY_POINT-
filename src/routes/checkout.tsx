@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { loadCart, saveCart, type CartItem } from "@/lib/cart";
 import { RazorpayButton } from "@/components/RazorpayButton";
+import { saveOrder } from "@/lib/order-db";
 import qrCode from "@/assets/3099f068-84ae-4cf3-9fd2-4c90c850804a.jpg";
 
 export const Route = createFileRoute("/checkout")({
@@ -41,6 +42,19 @@ function Checkout() {
   const [method, setMethod] = useState<"upi" | "card">("upi");
   const [step, setStep] = useState(1);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [orderStatus, setOrderStatus] = useState("");
+
+  const [customer, setCustomer] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
 
   useEffect(() => {
     setCart(loadCart());
@@ -67,6 +81,49 @@ function Checkout() {
         .map((item) => (item.id === id ? { ...item, qty: item.qty - 1 } : item))
         .filter((item) => item.qty > 0),
     );
+  }
+
+  async function confirmPayment() {
+    if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone || !customer.address || !customer.city || !customer.state || !customer.pincode) {
+      setOrderStatus("Please fill all customer details");
+      return;
+    }
+
+    if (cart.length === 0) {
+      setOrderStatus("Cart is empty");
+      return;
+    }
+
+    setIsSavingOrder(true);
+    setOrderStatus("");
+
+    try {
+      await saveOrder({
+        first_name: customer.firstName,
+        last_name: customer.lastName,
+        email: customer.email,
+        phone: customer.phone,
+        address: customer.address,
+        city: customer.city,
+        state: customer.state,
+        pincode: customer.pincode,
+        items: cart,
+        subtotal,
+        tax,
+        shipping,
+        total,
+        status: "pending",
+      });
+
+      setOrderStatus("✓ Order saved! Admin will confirm payment.");
+      updateCart([]);
+      setStep(3);
+    } catch (error) {
+      console.error(error);
+      setOrderStatus("Error saving order. Check Supabase orders table.");
+    } finally {
+      setIsSavingOrder(false);
+    }
   }
 
   function handlePaymentSuccess() {
@@ -158,17 +215,17 @@ function Checkout() {
               <h2 className="mb-1 font-['Bebas_Neue'] text-3xl tracking-wider">SHIPPING DETAILS</h2>
               <p className="mb-6 text-xs opacity-50">Where should we send your kit?</p>
               <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="FIRST NAME" placeholder="Sunil" />
-                <Field label="LAST NAME" placeholder="Chhetri" />
-                <Field label="EMAIL" type="email" placeholder="you@playpoint.in" />
-                <Field label="PHONE" type="tel" placeholder="+91 98765 43210" />
+                <Field label="FIRST NAME" placeholder="Sunil" value={customer.firstName} onChange={(e) => setCustomer({...customer, firstName: e.target.value})} />
+                <Field label="LAST NAME" placeholder="Chhetri" value={customer.lastName} onChange={(e) => setCustomer({...customer, lastName: e.target.value})} />
+                <Field label="EMAIL" type="email" placeholder="you@playpoint.in" value={customer.email} onChange={(e) => setCustomer({...customer, email: e.target.value})} />
+                <Field label="PHONE" type="tel" placeholder="+91 98765 43210" value={customer.phone} onChange={(e) => setCustomer({...customer, phone: e.target.value})} />
                 <div className="sm:col-span-2">
-                  <Field label="ADDRESS" placeholder="42 Park Street" />
+                  <Field label="ADDRESS" placeholder="42 Park Street" value={customer.address} onChange={(e) => setCustomer({...customer, address: e.target.value})} />
                 </div>
-                <Field label="CITY" placeholder="Mumbai" />
-                <Field label="PINCODE" placeholder="400001" />
+                <Field label="CITY" placeholder="Mumbai" value={customer.city} onChange={(e) => setCustomer({...customer, city: e.target.value})} />
+                <Field label="PINCODE" placeholder="400001" value={customer.pincode} onChange={(e) => setCustomer({...customer, pincode: e.target.value})} />
                 <div className="sm:col-span-2">
-                  <Field label="STATE" placeholder="Maharashtra" />
+                  <Field label="STATE" placeholder="Maharashtra" value={customer.state} onChange={(e) => setCustomer({...customer, state: e.target.value})} />
                 </div>
               </div>
             </section>
@@ -221,16 +278,31 @@ function Checkout() {
               )}
 
               {method === "upi" && (
-                <div className="mt-6 grid gap-5 border border-dashed border-white/15 bg-white/[0.02] p-6 sm:grid-cols-[140px_1fr] sm:items-center">
-                  <div className="grid aspect-square place-items-center overflow-hidden border border-white/10 bg-white p-2">
-                    <img src={qrCode} alt="UPI QR Code" className="h-full w-full" />
+                <div className="mt-6 space-y-4">
+                  <div className="grid gap-5 border border-dashed border-white/15 bg-white/[0.02] p-6 sm:grid-cols-[140px_1fr] sm:items-center">
+                    <div className="grid aspect-square place-items-center overflow-hidden border border-white/10 bg-white p-2">
+                      <img src={qrCode} alt="UPI QR Code" className="h-full w-full" />
+                    </div>
+                    <div>
+                      <div className="font-['Bebas_Neue'] text-3xl tracking-wider">SCAN AND PAY</div>
+                      <p className="mt-2 text-sm opacity-55">
+                        Use any UPI app to complete payment. Your order will be confirmed after payment verification.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-['Bebas_Neue'] text-3xl tracking-wider">SCAN AND PAY</div>
-                    <p className="mt-2 text-sm opacity-55">
-                      Use any UPI app to complete payment. Your order will be confirmed after payment verification.
-                    </p>
-                  </div>
+                  {orderStatus && (
+                    <div className={`border px-4 py-3 text-sm ${orderStatus.startsWith("✓") ? "border-[#3dd17f] bg-[#3dd17f]/10 text-[#3dd17f]" : "border-[#ffc72c] bg-[#ffc72c]/10 text-[#ffc72c]"}`}>
+                      {orderStatus}
+                    </div>
+                  )}
+                  <button
+                    onClick={confirmPayment}
+                    disabled={isSavingOrder}
+                    className="w-full bg-[#e8192c] py-4 font-['Bebas_Neue'] text-xl tracking-[0.28em] transition hover:bg-[#ff2d40] disabled:opacity-60"
+                    style={{ clipPath: "polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%)" }}
+                  >
+                    {isSavingOrder ? "SAVING..." : "I'VE PAID - CONFIRM"}
+                  </button>
                 </div>
               )}
             </section>
