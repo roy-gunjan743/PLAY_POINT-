@@ -4,6 +4,7 @@ import {
   Check,
   ChevronLeft,
   CreditCard,
+  Lock,
   Minus,
   Plus,
   QrCode,
